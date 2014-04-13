@@ -20,14 +20,15 @@ server.on('connection', function(id) {
 io.sockets.on('connection', function (socket) {
   //socket.emit('news', { hello: 'world' });
   socket.on('newpeer', function (id) {
+    socket.peer_id = id;
     peers[id] = 1;
     io.sockets.emit('updatelist', Object.keys(peers));
   });
 
   socket.on('disconnect', function() {
-    delete peers[id];
+    delete peers[socket.peer_id];
     io.sockets.emit('updatelist', Object.keys(peers));
-    console.log("Peer gone: " + id);
+    console.log("Peer gone: " + socket.peer_id);
     console.log(peers);
   });
 });
