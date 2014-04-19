@@ -38,6 +38,7 @@ APP.newPP = function() {
   });
 
   socket.on('update_list', function(listUsers) {
+    console.log('update_list event: ' + listUsers);
     var u = $('#users');
     myPeers = listUsers;
     u.empty();
