@@ -7,22 +7,23 @@ var express = require('express'),
     io = require('socket.io').listen(http),
     PeerServer = require('peer').PeerServer,
     server = new PeerServer({port: 9000}),
-    peers = {};
-
-
-server.on('connection', function(id) {
-  console.log("New peer: " + id);
-  console.log(peers);
-});
-
+    peers = {},
+    rooms = {}; // name -> [ peer_id, peer_id ...]
 
 
 io.sockets.on('connection', function (socket) {
-  //socket.emit('news', { hello: 'world' });
   socket.on('newpeer', function (id) {
     socket.peer_id = id;
     peers[id] = 1;
-    io.sockets.emit('updatelist', Object.keys(peers));
+    io.sockets.emit('updateList', Object.keys(peers));
+  });
+
+  socket.on('modeChange', function(newMode) {
+    io.sockets.emit('updatelist', "Mode is now: " + newMode);
+  });
+
+  socket.on('sendChat', function(msg) {
+    io.sockets.emit('updatechat', socket.peer_id, msg);
   });
 
   socket.on('disconnect', function() {

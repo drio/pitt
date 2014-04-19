@@ -12,10 +12,23 @@
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript" src="/app.js"></script>
 
+<link rel="stylesheet" type="text/css" media="screen, print, handheld" href="/styles.css" />
+
+
 <script>
   $(function() {
-    var pittPeer = APP.newPP($('#main'));
+    var pittPeer = APP.newPP();
   });
 </script>
 
 <div id="main">
+  <div id="list">
+    <b>List of Users:</b> <div id="users"></div>
+  </div>
+</div>
+
+<div id="chat_area">
+  <div id="conversation"></div>
+  <input id="data" style="width:200px;" />
+  <input type="button" id="datasend" value="send" />
+</div>

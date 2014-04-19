@@ -1,11 +1,25 @@
+// vim: set ts=2 et:
 var APP = {};
 
-APP.newPP = function(infoDiv) {
-  var my_id, peer, pittPeer = {},
+APP.newPP = function() {
+  var my_id, peer, o = {},
       socket = io.connect('http://localhost:8111');
 
-  function log(msg) {
-    infoDiv.append(">> " + msg + "<br>");
+  APP.socket = socket;
+
+  function setClicks() {
+      $('#datasend').click( function() {
+        var message = $('#data').val();
+        $('#data').val('');
+        socket.emit('sendChat', message);
+      });
+
+      $('#data').keypress(function(e) {
+        if(e.which == 13) {
+          $(this).blur();
+          $('#datasend').focus().click();
+        }
+      });
   }
 
   function connect(c) {
@@ -16,17 +30,28 @@ APP.newPP = function(infoDiv) {
     peer = new Peer(my_id, {host: 'localhost', port: 9000});
 
     peer.on('open', function(id){
-      log("Conexion ready, your peer id is: " + id);
       socket.emit('newpeer', id);
     });
 
     peer.on('connection', connect);
-
-    return pittPeer;
   });
 
-  socket.on('updatelist', function(data) {
+  socket.on('updateList', function(listUsers) {
+    var u = $('#users');
+    u.empty();
+    listUsers.forEach(function(e, i, a) {
+      u.append(e + "<br>");
+    });
+  });
+
+  socket.on('updatechat', function (username, data) {
+    $('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+  });
+
+  socket.on('modeChange', function(data) {
     log(data);
   });
 
+  setClicks();
+  return null;
 };
