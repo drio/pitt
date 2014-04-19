@@ -3,7 +3,8 @@ var APP = {};
 
 APP.newPP = function() {
   var my_id, peer, o = {},
-      socket = io.connect('http://localhost:8111');
+      socket = io.connect('http://localhost:8111'),
+      myPeers;
 
   APP.socket = socket;
 
@@ -11,7 +12,7 @@ APP.newPP = function() {
       $('#datasend').click( function() {
         var message = $('#data').val();
         $('#data').val('');
-        socket.emit('sendChat', message);
+        socket.emit('send_chat', message, myPeers);
       });
 
       $('#data').keypress(function(e) {
@@ -36,19 +37,20 @@ APP.newPP = function() {
     peer.on('connection', connect);
   });
 
-  socket.on('updateList', function(listUsers) {
+  socket.on('update_list', function(listUsers) {
     var u = $('#users');
+    myPeers = listUsers;
     u.empty();
     listUsers.forEach(function(e, i, a) {
       u.append(e + "<br>");
     });
   });
 
-  socket.on('updatechat', function (username, data) {
+  socket.on('update_chat', function (username, data) {
     $('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
   });
 
-  socket.on('modeChange', function(data) {
+  socket.on('mode_change', function(data) {
     log(data);
   });
 
