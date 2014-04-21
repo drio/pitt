@@ -1,12 +1,14 @@
 // vim: set ts=2 et:
 var APP = {};
 
-APP.newPP = function() {
-  var my_id, peer, o = {},
+APP.newPP = function(_isAdmin) {
+  var my_id, peer, iface = {},
       socket = io.connect('http://localhost:8111'),
-      myPeers;
+      myPeers,
+      isAdmin = _isAdmin === undefined ? false : true;
 
   APP.socket = socket;
+
 
   function setClicks() {
       $('#datasend').click( function() {
@@ -31,11 +33,28 @@ APP.newPP = function() {
     peer = new Peer(my_id, {host: 'localhost', port: 9000});
 
     peer.on('open', function(id){
-      socket.emit('newpeer', id);
+      if (isAdmin) socket.emit('newadmin', id);
+      else socket.emit('newpeer', id);
     });
 
     peer.on('connection', connect);
   });
+
+  if (isAdmin) {
+    console.log("Admin mode.");
+    socket.on('list_rooms', function(listRooms) {
+      console.log('update ROOMS event: ' + listRooms);
+      var r = $('#rooms');
+      r.empty();
+      Object.keys(listRooms).forEach(function(name, i, a) {
+        r.append("<ul>" + name);
+        listRooms[name].forEach(function(user, _i, _a) {
+          r.append("<li>" + user);
+        });
+        r.append("</ul>");
+      });
+    });
+  }
 
   socket.on('update_list', function(listUsers) {
     console.log('update_list event: ' + listUsers);
@@ -56,5 +75,5 @@ APP.newPP = function() {
   });
 
   setClicks();
-  return null;
+  return iface;
 };

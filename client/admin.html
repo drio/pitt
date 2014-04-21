@@ -15,7 +15,7 @@
 
 <script>
   $(function() {
-    var pittPeer = APP.newPP(),
+    var pittPeer = APP.newPP(true),
         socket = APP.socket;
 
     $('#bMode').click(function() {
@@ -36,7 +36,7 @@
   </div>
 
   <div id="list">
-    <b>List of Users:</b> <div id="users"></div>
+    <b>Rooms:</b> <div id="rooms"></div>
   </div>
 </div>
 

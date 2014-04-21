@@ -3,6 +3,7 @@
 module.exports = function() {
   var iface = {}, // intarface too all this logic
       def_room = "room1",
+      admins = {},
       peers = {}, rooms = {}, ppr = 2; // # People per room
 
   iface.peers = function(_) {
@@ -56,20 +57,27 @@ module.exports = function() {
 
   function setSocketEvents(io) {
     io.sockets.on('connection', function (socket) {
+
+      socket.on('newadmin', function (id) {
+        socket.peer_id = id;
+        admins[id] = socket;
+        io.sockets.emit('list_rooms', rooms);
+      });
+
       socket.on('newpeer', function (id) {
         socket.peer_id = id;
         peers[id] = socket;
         rooms[def_room].push(id);
         io.sockets.emit('update_list', Object.keys(peers));
+        io.sockets.emit('list_rooms', rooms);
       });
 
       socket.on('mode_change', function(newMode) {
-        if (newMode === 'Few') {
-          multiRooms();
-        } else {
-          singleRoom();
-        }
+        if (newMode === 'Few') multiRooms();
+        else singleRoom();
+
         updateClientsLists();
+        io.sockets.emit('list_rooms', rooms);
       });
 
       socket.on('send_chat', function(msg, listUsers) {
