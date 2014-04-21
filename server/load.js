@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+// vim: set ts=2 et:
+
+var express = require('express'),
+    app = express(),
+    http = require('http').createServer(app),
+    io = require('socket.io').listen(http),
+    slogic = require('logic'),
+    PeerServer = require('peer').PeerServer,
+    server = new PeerServer({port: 9000}),
+    l = slogic();
+
+l.singleRoom();
+l.setSocketEvents(io);
+
+app.use('/', express.static(__dirname + '/../client'));
+http.listen(8111);
