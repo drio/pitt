@@ -6,14 +6,12 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Content-Language" content="en-us">
 
-
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-<script type="text/javascript" src="/peer.min.js"></script>
+<script type="text/javascript" src="/third_party/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/third_party/peer.min.js"></script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript" src="/app.js"></script>
 
-<link rel="stylesheet" type="text/css" media="screen, print, handheld" href="/styles.css" />
-
+<link rel="stylesheet" type="text/css" media="screen, print, handheld" href="/styles/styles.css" />
 
 <script>
   $(function() {
@@ -28,7 +26,12 @@
 </div>
 
 <div id="chat_area">
+  <div id="user_id"></div>
   <div id="conversation"></div>
   <input id="data" style="width:200px;" />
   <input type="button" id="datasend" value="send" />
+</div>
+
+<div id="question_area">
+  <div id="question">asdfasdf asdf asf asfd </div>
 </div>

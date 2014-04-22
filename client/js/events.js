@@ -1,5 +1,4 @@
 // vim: set ts=2 et:
-var APP = {};
 
 APP.newPP = function(_isAdmin) {
   var my_id, peer, iface = {},
@@ -32,6 +31,8 @@ APP.newPP = function(_isAdmin) {
     my_id = window.prompt("Please enter your user id");
     peer = new Peer(my_id, {host: 'localhost', port: 9000});
 
+    $('#user_id').html("[" + my_id + "]");
+
     peer.on('open', function(id){
       if (isAdmin) socket.emit('newadmin', id);
       else socket.emit('newpeer', id);
@@ -62,7 +63,8 @@ APP.newPP = function(_isAdmin) {
     myPeers = listUsers;
     u.empty();
     listUsers.forEach(function(e, i, a) {
-      u.append(e + "<br>");
+      if (e !== my_id)
+        u.append(e + "<br>");
     });
   });
 
