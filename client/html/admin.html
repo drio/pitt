@@ -16,7 +16,14 @@
 <script>
   $(function() {
     var pittPeer = APP.newPP(true),
-        socket = APP.socket;
+        socket = APP.socket,
+        q = APP.question();
+
+   q.question("How much is it 2+2?")
+    .correct("4")
+    .wrong("0")
+    .wrong("100")
+    .wrong("200");
 
     $('#bMode').click(function() {
       var b = $('#bMode'),

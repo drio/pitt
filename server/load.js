@@ -5,9 +5,9 @@ var express = require('express'),
     app = express(),
     http = require('http').createServer(app),
     io = require('socket.io').listen(http),
-    slogic = require('logic'),
     PeerServer = require('peer').PeerServer,
     server = new PeerServer({port: 9000}),
+    slogic = require('logic'),
     l = slogic();
 
 l.singleRoom();
