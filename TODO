@@ -1,0 +1,28 @@
+
+1 admin logins
+
+2 sets question
+  -> Set up question at code level for the momement (hardcode)
+  -> q.fromJSON({ 'question': '2+2?', 'correct': '4', 'wrong': [ '0', '1' ] })
+  -> q.toJSON()
+  -> question has to be send to the server
+
+3 students login
+  -> The server sends the question to the student so she/he can see it.
+  -> display question in student view
+
+4 Users answer the question (MODE I)
+  -> add interface in client
+  -> send answer to server
+  -> server sends data to admin to update the question
+  -> add admin frontend logic to update question
+
+5 admin change to group mode
+  -> server send list of peers to students
+  -> admin gets list of groups created
+  -> admin client show list of groups created
+  -> server signals clients to enter in videochat mode
+
+6 admin set chat mode
+  -> server send list of peers to students (all students)
+  -> client side: chat mode is cancelled they go back to (5)
