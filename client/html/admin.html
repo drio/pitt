@@ -17,21 +17,20 @@
   $(function() {
     var pittPeer = APP.newPP(true),
         socket = APP.socket,
-        q = APP.question();
+        q = {
+          'question': 'How much is 2+2?',
+          'answers': [ '1', '2', '4', '100' ]
+        };
 
-   q.question("How much is it 2+2?")
-    .correct("4")
-    .wrong("0")
-    .wrong("100")
-    .wrong("200");
+    socket.emit('question_from_admin', q);
 
     $('#bMode').click(function() {
       var b = $('#bMode'),
           currVal = b.val(),
           newVal = (currVal === "All") ? "Few" : "All";
 
-          b.attr('value', newVal);
-          socket.emit('mode_change', currVal);
+       b.attr('value', newVal);
+       socket.emit('mode_change', currVal);
     });
 
   });

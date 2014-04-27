@@ -4,7 +4,8 @@ module.exports = function() {
   var iface = {}, // intarface too all this logic
       def_room = "room1",
       admins = {},
-      peers = {}, rooms = {}, ppr = 2; // # People per room
+      peers = {}, rooms = {}, ppr = 2, // # People per room
+      question;
 
   iface.peers = function(_) {
     if (!arguments.length) return peers;
@@ -58,6 +59,11 @@ module.exports = function() {
   function setSocketEvents(io) {
     io.sockets.on('connection', function (socket) {
 
+      socket.on('question_from_admin', function (q) {
+        question = q;
+        io.sockets.emit('broadcast_question', q);
+      });
+
       socket.on('newadmin', function (id) {
         socket.peer_id = id;
         admins[id] = socket;
@@ -70,6 +76,7 @@ module.exports = function() {
         rooms[def_room].push(id);
         io.sockets.emit('update_list', Object.keys(peers));
         io.sockets.emit('list_rooms', rooms);
+        io.sockets.emit('broadcast_question', question);
       });
 
       socket.on('mode_change', function(newMode) {

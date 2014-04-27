@@ -73,7 +73,15 @@ APP.newPP = function(_isAdmin) {
   });
 
   socket.on('mode_change', function(data) {
-    log(data);
+    console.log('mode_change: ' + data);
+  });
+
+  socket.on('broadcast_question', function(q) {
+    console.log('asdfasdfasdfasdf');
+    $('#question').html('<b>' + q.question + '</b>');
+    q.answers.forEach(function(a, idx, arr) {
+      $('#answers').append('<li>' + a + '</li>');
+    });
   });
 
   setClicks();

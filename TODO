@@ -2,14 +2,12 @@
 1 admin logins
 
 2 sets question
-  -> Set up question at code level for the momement (hardcode)
-  -> q.fromJSON({ 'question': '2+2?', 'correct': '4', 'wrong': [ '0', '1' ] })
-  -> q.toJSON()
-  -> question has to be send to the server
+  DONE -> Set up question at code level for the momement (hardcode)
+  DONE -> question has to be send to the server
 
 3 students login
-  -> The server sends the question to the student so she/he can see it.
-  -> display question in student view
+  DONE -> The server sends the question to the student so she/he can see it.
+  DONE -> display question in student view when Socket event arrives
 
 4 Users answer the question (MODE I)
   -> add interface in client
