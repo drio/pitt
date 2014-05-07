@@ -20,7 +20,12 @@
   -> admin gets list of groups created
   -> admin client show list of groups created
   -> server signals clients to enter in videochat mode
+  -> each client connects to all the other clients (in group)
+  -> start video chat
 
 6 admin set chat mode
   -> server send list of peers to students (all students)
   -> client side: chat mode is cancelled they go back to (5)
+
+
+-> remove user when closes socket

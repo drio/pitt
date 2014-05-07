@@ -14,7 +14,7 @@ app.js: \
 	cat $@ > client/app.js
 
 serve: app.js
-	node server/load.js
+	NODE_PATH=$$NODE_PATH:$(shell pwd)/server; node server/load.js
 
 test: app.js
 	node test/multi_rooms.js >/dev/null
