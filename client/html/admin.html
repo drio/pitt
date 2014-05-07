@@ -16,13 +16,7 @@
 <script>
   $(function() {
     var pittPeer = APP.newPP(true),
-        socket = APP.socket,
-        q = {
-          'question': 'How much is 2+2?',
-          'answers': [ '1', '2', '4', '100' ]
-        };
-
-    socket.emit('question_from_admin', q);
+        socket = APP.socket;
 
     $('#bMode').click(function() {
       var b = $('#bMode'),
@@ -37,12 +31,7 @@
 </script>
 
 <div id="main">
-  <div id="mode">
-    <input type="button" id="bMode" value="Few" />
-  </div>
-
-  <div id="list">
-    <b>Rooms:</b> <div id="rooms"></div>
-  </div>
+  You are: <span id="you_are"> </span>
+  <input type="button" id="bMode" value="Few" />
+  <div id="list_users"></div>
 </div>
-

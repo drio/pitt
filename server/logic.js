@@ -4,8 +4,7 @@ module.exports = function() {
   var iface = {}, // intarface too all this logic
       def_room = "room1",
       admins = {},
-      peers = {}, rooms = {}, ppr = 2, // # People per room
-      question;
+      peers = {}, rooms = {}, ppr = 2; // # People per room
 
   iface.peers = function(_) {
     if (!arguments.length) return peers;
@@ -56,13 +55,14 @@ module.exports = function() {
     });
   }
 
+  function update_rooms(id_gone) {
+    Object.keys(rooms).forEach(function(name, idx, a) {
+      rooms[name].splice(rooms[name].indexOf(id_gone), 1);
+    });
+  }
+
   function setSocketEvents(io) {
     io.sockets.on('connection', function (socket) {
-
-      socket.on('question_from_admin', function (q) {
-        question = q;
-        io.sockets.emit('broadcast_question', q);
-      });
 
       socket.on('newadmin', function (id) {
         socket.peer_id = id;
@@ -76,7 +76,6 @@ module.exports = function() {
         rooms[def_room].push(id);
         io.sockets.emit('update_list', Object.keys(peers));
         io.sockets.emit('list_rooms', rooms);
-        io.sockets.emit('broadcast_question', question);
       });
 
       socket.on('mode_change', function(newMode) {
@@ -87,15 +86,13 @@ module.exports = function() {
         io.sockets.emit('list_rooms', rooms);
       });
 
-      socket.on('send_chat', function(msg, listUsers) {
-        listUsers.forEach(function(u_id, ix, a) {
-          peers[u_id].emit('update_chat', socket.peer_id, msg);
-        });
-      });
-
       socket.on('disconnect', function() {
         delete peers[socket.peer_id];
+        delete admins[socket.peer_id];
+        update_rooms(socket.peer_id);
+
         io.sockets.emit('update_list', Object.keys(peers));
+        io.sockets.emit('list_rooms', rooms);
         console.log("Peer gone: " + socket.peer_id);
         console.log(peers);
       });

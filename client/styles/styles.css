@@ -1,9 +1,12 @@
-
 #main {
   padding:10px;
 }
 
-#list {
+#you_are {
+  padding: 10px;
+}
+
+#list_users {
   float:left;
   width:150px;
   border-right:1px solid black;
@@ -12,30 +15,11 @@
   overflow:scroll-y;
 }
 
-#mode {
-  width:150px;
-  border-right:1px solid black;
-  border-bottom:1px solid black;
-  padding:10px;
-}
-
-#chat_area {
+#list_users {
   float:left;
   width:300px;
   height:300px;
   overflow:scroll-y;
   padding:10px;
   border-right:1px solid black;
-}
-
-#question_area {
-  float:left;
-  width:300px;
-  height:250px;
-  padding:10px;
-}
-
-#user_id {
-  font-size: 120%;
-  color: green;
 }

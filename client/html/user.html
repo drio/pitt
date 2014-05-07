@@ -15,24 +15,14 @@
 
 <script>
   $(function() {
-    var pittPeer = APP.newPP();
+    var pittPeer = APP.newPP(false);
   });
 </script>
 
 <div id="main">
-  <div id="list">
-    <b>List of Users:</b> <div id="users"></div>
-  </div>
+  You are: <span id="you_are"> </span>
+  <div id="list_users"> </div>
+  <div id="video_chat_area"> </div>
 </div>
 
-<div id="chat_area">
-  <div id="user_id"></div>
-  <div id="conversation"></div>
-  <input id="data" style="width:200px;" />
-  <input type="button" id="datasend" value="send" />
-</div>
 
-<div id="question_area">
-  <div id="question"></div>
-  <div id="answers"></div>
-</div>
