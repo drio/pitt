@@ -37,7 +37,6 @@
       $('#make-call').click(function(){
         // Initiate a call!
         var call = peer.call($('#callto-id').val(), window.localStream);
-
         step3(call);
       });
 
@@ -82,7 +81,13 @@
 
       // Wait for stream on the call, then set peer video display
       call.on('stream', function(stream){
-        $('#their-video').prop('src', URL.createObjectURL(stream));
+        //$('#their-video').prop('src', URL.createObjectURL(stream));
+        var video_el = $('<video>');
+        video_el.prop('autoplay', true);
+        video_el.prop('id', 'stream-' + call.peer);
+        video_el.prop('src', URL.createObjectURL(stream));
+        video_el.prop('class', 'their-video');
+        $('#container-their-video').append(video_el);
       });
 
       // UI stuff
@@ -101,11 +106,12 @@
 <body>
 
   <div class="pure-g">
-
       <!-- Video area -->
-      <div class="pure-u-2-3" id="video-container">
-        <video id="their-video" autoplay></video>
+      <div class="video-container">
         <video id="my-video" muted="true" autoplay></video>
+      </div>
+      <div id="container-their-video" class="video-container">
+        <!-- <video id="their-video" autoplay></video> -->
       </div>
 
       <!-- Steps -->
