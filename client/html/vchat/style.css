@@ -46,14 +46,14 @@ Copyright (c) Nicolas Gallagher and Jonathan Neal
 }
 
 #their-video {
-  width: 50%;
-  height: 75%;
-  max-height: 280px;
+  width: 280px;
+  height: 200px;
+  /*max-height: 280px;*/
   background-color: #eee;
 }
 
-#video-container {
-  padding: 25px;
+.video-container {
+  padding: 10px;
   text-align: center;
 }
 
