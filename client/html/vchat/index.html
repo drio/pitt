@@ -43,6 +43,7 @@
       $('#end-call').click(function(){
         Object.keys(window.existingCall).forEach(function(k, i, a) {
           window.existingCall[k].close();
+          $('#stream-' + k).remove();
         });
         step2();
       });
