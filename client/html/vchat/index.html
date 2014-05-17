@@ -9,6 +9,9 @@
     // Compatibility shim
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
+    // Store calls
+    window.existingCall = {};
+
     // PeerJS object
     var pid = 'drd_' + Math.floor(Math.random()*10000),
         peer = new Peer(pid, { key: 'lwjd5qra8257b9', debug: 3});
@@ -39,7 +42,9 @@
       });
 
       $('#end-call').click(function(){
-        window.existingCall.close();
+        Object.keys(window.existingCall).forEach(function(k, i, a) {
+          window.existingCall[k].close();
+        });
         step2();
       });
 
@@ -71,8 +76,8 @@
 
     function step3 (call) {
       // Hang up on an existing call if present
-      if (window.existingCall) {
-        window.existingCall.close();
+      if (call.peer in window.existingCall) {
+        window.existingCall[call.peer].close();
       }
 
       // Wait for stream on the call, then set peer video display
@@ -81,7 +86,7 @@
       });
 
       // UI stuff
-      window.existingCall = call;
+      window.existingCall[call.peer] = call;
       $('#their-id').text(call.peer);
       call.on('close', step2);
       $('#step1, #step2').hide();
