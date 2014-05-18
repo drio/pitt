@@ -16,7 +16,7 @@
  */
 (function() {
 
-videoChat = function(el_local_video, el_remote_videos) {
+var vc = function(el_local_video, el_remote_videos) {
 
   navigator.getUserMedia = navigator.getUserMedia ||
                            navigator.webkitGetUserMedia ||
@@ -92,6 +92,9 @@ videoChat = function(el_local_video, el_remote_videos) {
 
 if (window['APP'] != undefined) {
   APP.videoChat = _videoChat;
+}
+else {
+  videoChat = vc;
 }
 
 })();
