@@ -15,17 +15,7 @@
 
 <script>
   $(function() {
-    var pittPeer = APP.newPP(true),
-        socket = APP.socket;
-
-    $('#bMode').click(function() {
-      var b = $('#bMode'),
-          currVal = b.val(),
-          newVal = (currVal === "All") ? "Few" : "All";
-
-       b.attr('value', newVal);
-       socket.emit('mode_change', currVal);
-    });
+    var pittPeer = APP.newPP(true);
 
   });
 </script>

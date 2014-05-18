@@ -1,31 +1,20 @@
 
-1 admin logins
+Storyline:
 
-2 sets question
-  DONE -> Set up question at code level for the momement (hardcode)
-  DONE -> question has to be send to the server
+. admin logins
+. while users login
+  DONE - add them to default room
+  DONE - display users connected in users browser
+  DONE - display rooms in admin page
+. admin clicks change state to "groups" (she wants to group people)
+  DONE - admin clicks
+  DONE - admin's client code sends event to server
+  DONE - server creates the rooms
+  DONE - server broadcasts the groups/rooms
+  DONE - user code: update list (print you are in group mode)
+  DONE - admin code: update room list
 
-3 students login
-  DONE -> The server sends the question to the student so she/he can see it.
-  DONE -> display question in student view when Socket event arrives
+  - user code:
+    - send audio/video to members of group
+    - receive audio/video from others
 
-4 Users answer the question (MODE I)
-  -> add interface in client
-  -> send answer to server
-  -> server sends data to admin to update the question
-  -> add admin frontend logic to update question
-
-5 admin change to group mode
-  -> server send list of peers to students
-  -> admin gets list of groups created
-  -> admin client show list of groups created
-  -> server signals clients to enter in videochat mode
-  -> each client connects to all the other clients (in group)
-  -> start video chat
-
-6 admin set chat mode
-  -> server send list of peers to students (all students)
-  -> client side: chat mode is cancelled they go back to (5)
-
-
--> remove user when closes socket

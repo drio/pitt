@@ -81,7 +81,7 @@ module.exports = function() {
       socket.on('mode_change', function(newMode) {
         if (newMode === 'Few') multiRooms();
         else singleRoom();
-
+        // update users and admins
         updateClientsLists();
         io.sockets.emit('list_rooms', rooms);
       });
