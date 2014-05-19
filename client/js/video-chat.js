@@ -91,7 +91,7 @@ var vc = function(el_local_video, el_remote_videos) {
 }
 
 if (window['APP'] != undefined) {
-  APP.videoChat = _videoChat;
+  APP.videoChat = vc;
 }
 else {
   videoChat = vc;
