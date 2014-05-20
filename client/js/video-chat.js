@@ -4,8 +4,8 @@
  * Encapsulates all the logic to handle the video calls.
  * Interface is as follows:
  *
- * var vc = videoChat(jquery_local_video_el, jquery_div_remote_videos)
- * vc.start(call_back_on_open);
+ * var vc = videoChat(jquery_local_video_el, jquery_div_remote_videos, callback_on_open)
+ * vc.start();
  * vc.make_calls([ "peer1", "peer2"]);
  * vc.end_calls();
  *
@@ -17,7 +17,7 @@
  */
 (function() {
 
-var vc = function(el_local_video, el_remote_videos) {
+var vc = function(el_local_video, el_remote_videos, cb_on_open) {
 
   navigator.getUserMedia = navigator.getUserMedia ||
                            navigator.webkitGetUserMedia ||
@@ -34,19 +34,19 @@ var vc = function(el_local_video, el_remote_videos) {
       peerjs_cfg = {host: 'localhost', port: 9000},
       peer;
 
-  // Open peerjs connection to the server and setup handlers for incoming calls
-  // Get local media also.
-  function start(cb_on_open) {
-    if (_testing_mode)
-      peer = new Peer(pid, { key: 'lwjd5qra8257b9', debug: 3});
-    else
-      peer = new Peer(pid, peerjs_cfg);
+  // Main; connect to server
+  if (_testing_mode)
+    peer = new Peer(pid, { key: 'lwjd5qra8257b9', debug: 3});
+  else
+    peer = new Peer(pid, peerjs_cfg);
 
-    peer.on('open', function() {
-      console.log("Your peerjs ID: " + peer.id);
-      cb_on_open(peer);
-    });
+  peer.on('open', function() {
+    console.log("Your peerjs ID: " + peer.id);
+    cb_on_open(peer);
+  });
 
+  // setup incoming calls
+  function start() {
     // Receiving a call
     peer.on('call', function(call){
       // Answer the call automatically (instead of prompting user) for demo purposes
@@ -87,6 +87,8 @@ var vc = function(el_local_video, el_remote_videos) {
   // Interface
   iface.start = start;
 
+  iface.peer_id = function() { return peer.id; };
+
   iface.make_calls = function(listIds) {
     listIds.forEach(function(r_pid, i, a) {
       var call = peer.call(r_pid, localStream);
@@ -99,6 +101,8 @@ var vc = function(el_local_video, el_remote_videos) {
       existingCall[k].close();
       $('#' + seed_remote_video_id + k).remove();
     });
+    localStream.stop();
+    el_local_video.remove();
   }
 
   return iface;

@@ -15,7 +15,10 @@
 
 <script>
   $(function() {
-    var pittPeer = APP.newPP(false);
+    var is_admin = false,
+        el_my_video = $('#my-video'),
+        el_their_video = $('#container-their-video'),
+        pittPeer = APP.newPP(is_admin, el_my_video, el_their_video);
   });
 </script>
 

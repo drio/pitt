@@ -1,6 +1,6 @@
 // vim: set ts=2 et:
 
-APP.newPP = function(isAdmin) {
+APP.newPP = function(isAdmin, el_my_video, el_their_video) {
   var my_id, iface = {},
       socket = io.connect('http://localhost:8111'),
       myPeers,
@@ -44,19 +44,25 @@ APP.newPP = function(isAdmin) {
         if (e !== my_id)
           u.append(e + "<br>");
       });
-      if (listUsers.length < myPeers)
+
+      if (listUsers.length < myPeers) {
         console.log("We are in a room, video time!")
+        v_chat.start(function() { console.log("xxx"); });
+      }
+
       myPeers = listUsers;
     });
   }
 
   function for_both() {
     socket.on('connect', function() {
-      v_chat = APP.videoChat($('#my-video'), $('#container-their-video'), function(_peer) {
-        my_id = _peer.id;
+      v_chat = APP.videoChat(el_my_video, el_their_video, function() {
+        my_id = v_chat.peer_id();
         $("#you_are").html(my_id);
-        if (isAdmin) socket.emit('newadmin', my_id);
-        else socket.emit('newpeer', my_id);
+        if (isAdmin)
+          socket.emit('newadmin', my_id);
+        else
+          socket.emit('newpeer', my_id);
       });
     });
 

@@ -67,7 +67,7 @@ module.exports = function() {
       socket.on('newadmin', function (id) {
         socket.peer_id = id;
         admins[id] = socket;
-        io.sockets.emit('list_rooms', rooms);
+        //io.sockets.emit('list_rooms', rooms);
       });
 
       socket.on('newpeer', function (id) {

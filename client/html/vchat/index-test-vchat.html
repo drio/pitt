@@ -28,24 +28,25 @@
 <script type="text/javascript" src="/js/video-chat.js"></script>
 <script>
   $(function() {
-    var vc = videoChat($('#my-video'), $('#container-their-video'));
+    var vc = videoChat($('#my-video'), $('#container-their-video'), function() {
+      $('#my-id').text(vc.peer_id());
 
-    $('#start').click(function(){
-      vc.start(function(_peer) {
-        $('#my-id').text(_peer.id);
+      $('#start').click(function(){
+        vc.start();
+      });
+
+      $('#make_calls').click(function(){
+        var remote_ids = $('#callto-id').val();
+        console.log("Calling: " + remote_ids);
+        vc.make_calls(remote_ids.split(","));
+      });
+
+      $('#end_calls').click(function(){
+        vc.end_calls();
+        $('#my-id').text("...");
       });
     });
 
-    $('#make_calls').click(function(){
-      var remote_ids = $('#callto-id').val();
-      console.log("Calling: " + remote_ids);
-      vc.make_calls(remote_ids.split(","));
-    });
-
-    $('#end_calls').click(function(){
-      vc.end_calls();
-      $('#my-id').text("...");
-    });
   });
 </script>
 
