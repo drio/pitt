@@ -1,10 +1,10 @@
 // vim: set ts=2 et:
 
 APP.newPP = function(isAdmin) {
-  var my_id, peer, iface = {},
+  var my_id, iface = {},
       socket = io.connect('http://localhost:8111'),
-      peerjs_cfg = {host: 'localhost', port: 9000},
-      myPeers;
+      myPeers,
+      v_chat; // All the video chat logic
 
   function set_click_mode_change() {
     $('#bMode').click(function() {
@@ -52,17 +52,12 @@ APP.newPP = function(isAdmin) {
 
   function for_both() {
     socket.on('connect', function() {
-      my_id = window.prompt("Please enter your user id");
-      peer = new Peer(my_id, peerjs_cfg);
-
-      $("#you_are").html(my_id);
-
-      peer.on('open', function(id){
-        if (isAdmin) socket.emit('newadmin', id);
-        else socket.emit('newpeer', id);
+      v_chat = APP.videoChat($('#my-video'), $('#container-their-video'), function(_peer) {
+        my_id = _peer.id;
+        $("#you_are").html(my_id);
+        if (isAdmin) socket.emit('newadmin', my_id);
+        else socket.emit('newpeer', my_id);
       });
-
-      peer.on('connection', connect);
     });
 
     socket.on('mode_change', function(data) {
