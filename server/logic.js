@@ -47,10 +47,10 @@ module.exports = function() {
     });
   }
 
-  function updateClientsLists() {
+  function updateClientsLists(_type) {
     Object.keys(rooms).forEach(function(name, ri, _a) {
       rooms[name].forEach(function(_id, idx, users) {
-        peers[_id].emit('update_list', users);
+        peers[_id].emit('update_list', users, _type);
       });
     });
   }
@@ -74,15 +74,19 @@ module.exports = function() {
         socket.peer_id = id;
         peers[id] = socket;
         rooms[def_room].push(id);
-        io.sockets.emit('update_list', Object.keys(peers));
+        io.sockets.emit('update_list', Object.keys(peers), 'new');
         io.sockets.emit('list_rooms', rooms);
       });
 
       socket.on('mode_change', function(newMode) {
-        if (newMode === 'Few') multiRooms();
-        else singleRoom();
-        // update users and admins
-        updateClientsLists();
+        if (newMode === 'Few') {
+          multiRooms();
+          updateClientsLists('few');
+        } else {
+          singleRoom();
+          updateClientsLists('all');
+        }
+        // Update admins admins (rooms)
         io.sockets.emit('list_rooms', rooms);
       });
 
@@ -91,7 +95,7 @@ module.exports = function() {
         delete admins[socket.peer_id];
         update_rooms(socket.peer_id);
 
-        io.sockets.emit('update_list', Object.keys(peers));
+        io.sockets.emit('update_list', Object.keys(peers), 'gone');
         io.sockets.emit('list_rooms', rooms);
         console.log("Peer gone: " + socket.peer_id);
         console.log(peers);

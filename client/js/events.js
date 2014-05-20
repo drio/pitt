@@ -3,7 +3,6 @@
 APP.newPP = function(isAdmin, el_my_video, el_their_video) {
   var my_id, iface = {},
       socket = io.connect('http://localhost:8111'),
-      myPeers,
       v_chat; // All the video chat logic
 
   function set_click_mode_change() {
@@ -36,8 +35,8 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
   }
 
   function for_peer() {
-    socket.on('update_list', function(listUsers) {
-      console.log('update_list event: ' + listUsers);
+    socket.on('update_list', function(listUsers, change_type) {
+      console.log('update_list event: ' + listUsers + " | change_type: " + change_type);
       var u = $('#list_users');
       u.empty();
       listUsers.forEach(function(e, i, a) {
@@ -45,12 +44,14 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
           u.append(e + "<br>");
       });
 
-      if (listUsers.length < myPeers) {
+      if (change_type === 'few') {
         console.log("We are in a room, video time!")
-        v_chat.start(function() { console.log("xxx"); });
+        //v_chat.start();
       }
 
-      myPeers = listUsers;
+      if (change_type === 'all') {
+        console.log("Out of video chat mode!");
+      }
     });
   }
 
