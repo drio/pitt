@@ -46,7 +46,7 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
   });
 
   // setup incoming calls
-  function start() {
+  function start(cb) {
     // Receiving a call
     peer.on('call', function(call){
       // Answer the call automatically (instead of prompting user) for demo purposes
@@ -61,6 +61,7 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
     navigator.getUserMedia({audio: true, video: true}, function(stream){
       el_local_video.prop('src', URL.createObjectURL(stream));
       localStream = stream;
+      cb();
     }, function(){ console.log("Error getting UserMedia."); });
   }
 

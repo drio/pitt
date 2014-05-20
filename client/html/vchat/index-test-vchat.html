@@ -32,13 +32,11 @@
       $('#my-id').text(vc.peer_id());
 
       $('#start').click(function(){
-        vc.start();
-      });
-
-      $('#make_calls').click(function(){
-        var remote_ids = $('#callto-id').val();
-        console.log("Calling: " + remote_ids);
-        vc.make_calls(remote_ids.split(","));
+        vc.start(function(){
+          var remote_ids = $('#callto-id').val();
+          console.log("Calling: " + remote_ids);
+          vc.make_calls(remote_ids.split(","));
+        });
       });
 
       $('#end_calls').click(function(){
@@ -58,7 +56,6 @@
   <p> <a href="#" id="start">start</a>
   <div>
     <input type="text" placeholder="user_id1, user_id2, ...., user_id_n" id="callto-id">
-    <a href="#" id="make_calls">make calls</a>
   </div>
   <p> <a href="#" id="end_calls">end calls</a>
 
