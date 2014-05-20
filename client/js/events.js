@@ -3,13 +3,8 @@
 APP.newPP = function(isAdmin) {
   var my_id, peer, iface = {},
       socket = io.connect('http://localhost:8111'),
+      peerjs_cfg = {host: 'localhost', port: 9000},
       myPeers;
-
-  APP.socket = socket;
-
-  // We are connected to the peerjs server
-  function connect(c) {
-  }
 
   function set_click_mode_change() {
     $('#bMode').click(function() {
@@ -58,7 +53,7 @@ APP.newPP = function(isAdmin) {
   function for_both() {
     socket.on('connect', function() {
       my_id = window.prompt("Please enter your user id");
-      peer = new Peer(my_id, {host: 'localhost', port: 9000});
+      peer = new Peer(my_id, peerjs_cfg);
 
       $("#you_are").html(my_id);
 

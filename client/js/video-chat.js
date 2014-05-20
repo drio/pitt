@@ -31,7 +31,7 @@ var vc = function(el_local_video, el_remote_videos) {
       pid = pid_seed + Math.floor(Math.random() * 10000),
       peer = new Peer(pid, { key: 'lwjd5qra8257b9', debug: 3});
 
-  peer.on('open', function(){
+  peer.on('open', function() {
     console.log("Your peerjs ID: " + peer.id);
   });
 
@@ -90,11 +90,7 @@ var vc = function(el_local_video, el_remote_videos) {
   return iface;
 }
 
-if (window['APP'] != undefined) {
-  APP.videoChat = vc;
-}
-else {
-  videoChat = vc;
-}
+if (window['APP'] != undefined) APP.videoChat = vc;
+else videoChat = vc;
 
 })();
