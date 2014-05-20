@@ -28,13 +28,39 @@
 <script type="text/javascript" src="/js/video-chat.js"></script>
 <script>
   $(function() {
-    //var vc = videoChat($('#my-video'), $('#container-their-video'));
-    //vc.make_calls([ "peer1", "peer2"]);
-    //vc.end_calls();
+    var vc = videoChat($('#my-video'), $('#container-their-video'));
+
+    $('#start').click(function(){
+      vc.start(function(_peer) {
+        $('#my-id').text(_peer.id);
+      });
+    });
+
+    $('#make_calls').click(function(){
+      var remote_ids = $('#callto-id').val();
+      console.log("Calling: " + remote_ids);
+      vc.make_calls(remote_ids.split(","));
+    });
+
+    $('#end_calls').click(function(){
+      vc.end_calls();
+      $('#my-id').text("...");
+    });
   });
 </script>
 
 <body>
+  <div id="info_area">
+    <p>Your id: <span id="my-id">...</span></p>
+  </div>
+
+  <p> <a href="#" id="start">start</a>
+  <div>
+    <input type="text" placeholder="user_id1, user_id2, ...., user_id_n" id="callto-id">
+    <a href="#" id="make_calls">make calls</a>
+  </div>
+  <p> <a href="#" id="end_calls">end calls</a>
+
   <div class="main">
     <div class="video-container">
       <video id="my-video" muted="true" autoplay></video>
