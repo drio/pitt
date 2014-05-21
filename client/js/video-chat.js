@@ -29,7 +29,7 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
       localStream,
       class_remote_video_el = "their-video",
       seed_remote_video_id = "r_video_stream_",
-      pid_seed = "drd_",
+      pid_seed = "pitt_",
       pid = pid_seed + Math.floor(Math.random() * 10000),
       peerjs_cfg = {host: 'localhost', port: 9000},
       peer;

@@ -23,3 +23,23 @@
   padding:10px;
   border-right:1px solid black;
 }
+
+#my-video {
+  margin-top: 15px;
+  width: 180px;
+  height: auto;
+  background-color: #eee;
+}
+
+.their-video {
+  width: 280px;
+  height: 200px;
+  /*max-height: 280px;*/
+  background-color: #eee;
+}
+
+.video-container {
+  padding: 10px;
+  text-align: center;
+}
+

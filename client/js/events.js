@@ -46,12 +46,13 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
 
       if (change_type === 'few') {
         console.log("We are in a room, video time!")
-        //v_chat.start(function() { v_chat.make_calls(listUsers); });
+        console.log("Calling to: " + listUsers)
+        v_chat.start(function() { v_chat.make_calls(listUsers); });
       }
 
       if (change_type === 'all') {
         console.log("Out of video chat mode!");
-        //v_chat.end_calls();
+        v_chat.end_calls();
       }
     });
   }
