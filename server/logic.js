@@ -4,8 +4,11 @@ module.exports = function() {
   var iface = {}, // intarface too all this logic
       def_room = "room1",
       admins = {},
-      peers = {}, rooms = {}, ppr = 2; // # People per room
+      peers = {},
+      rooms = {},
+      ppr = 2; // # People per room
 
+  // bunch of getters and setters for .peers, .rooms and .ppr
   iface.peers = function(_) {
     if (!arguments.length) return peers;
     peers = _;
@@ -65,20 +68,27 @@ module.exports = function() {
     io.sockets.on('connection', function (socket) {
 
       socket.on('newadmin', function (id) {
+        console.log("newadmin1", rooms)
         socket.peer_id = id;
+        socket.is_admin = true;
         admins[id] = socket;
-        //io.sockets.emit('list_rooms', rooms);
+        io.sockets.emit('list_rooms', rooms);
+        console.log("newadmin2", rooms)
       });
 
       socket.on('newpeer', function (id) {
+        console.log("newpeer1", rooms)
         socket.peer_id = id;
+        socket.is_admin = false;
         peers[id] = socket;
         rooms[def_room].push(id);
         io.sockets.emit('update_list', Object.keys(peers), 'new');
         io.sockets.emit('list_rooms', rooms);
+        console.log("newpeer2", rooms)
       });
 
       socket.on('mode_change', function(newMode) {
+        console.log("New mode:", newMode)
         if (newMode === 'Few') {
           multiRooms();
           updateClientsLists('few');
@@ -91,14 +101,18 @@ module.exports = function() {
       });
 
       socket.on('disconnect', function() {
+        console.log("disconnect1", rooms)
         delete peers[socket.peer_id];
         delete admins[socket.peer_id];
-        update_rooms(socket.peer_id);
+        if (!socket.is_admin) {
+          update_rooms(socket.peer_id);
+        }
 
         io.sockets.emit('update_list', Object.keys(peers), 'gone');
         io.sockets.emit('list_rooms', rooms);
+        console.log("disconnect2", rooms)
         console.log("Peer gone: " + socket.peer_id);
-        console.log(peers);
+        // console.log(peers);
       });
     });
   }
