@@ -1,8 +1,13 @@
 // vim: set ts=2 et:
 
+var NOT_WORKING = 0;
+var BROADCAST_MODE = 2;
+var GROUP_MODE = 3;
+
 APP.newPP = function(isAdmin, el_my_video, el_their_video) {
   var my_id, iface = {},
       socket = io.connect('http://localhost:8111'),
+      mode = NOT_WORKING,
       v_chat; // All the video chat logic
 
   function set_click_mode_change() {
@@ -11,27 +16,45 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
           currVal = b.val(),
           newVal = (currVal === "All") ? "Few" : "All";
 
-       b.attr('value', newVal);
-       socket.emit('mode_change', currVal);
+      b.attr('value', newVal);
+      socket.emit('mode_change', currVal);
+      mode = (currVal === "All") ? BROADCAST_MODE : GROUP_MODE;
+      show_mode("#current_mode");
     });
   }
 
+  function show_mode(element) {
+    console.log("changing mode!")
+    $(element).text(
+      (mode === BROADCAST_MODE) ? "Broadcasting" : "Working in groups"
+    )
+  }
+
+  function set_click_start_broadcasting() {
+    $("#broadcast").click(function() {
+
+    })
+  }
+
   function for_admin() {
-   console.log("Admin mode.");
+    console.log("Admin mode.");
     socket.on('list_rooms', function(listRooms) {
-      console.log(listRooms);
+      // console.log(listRooms);
       var r = $('#list_users');
       r.empty();
       Object.keys(listRooms).forEach(function(name, i, a) {
         r.append("<ul>" + name);
         listRooms[name].forEach(function(user, _i, _a) {
-          r.append("<li>" + user);
+          r.append("<li>" + user + "</li>");
         });
         r.append("</ul>");
       });
     });
 
     set_click_mode_change();
+    socket.emit('mode_change', "All");
+    mode = BROADCAST_MODE;
+    show_mode("#current_mode");
   }
 
   function for_peer() {
@@ -69,6 +92,7 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
       });
     });
 
+    // XXX: this never happens?
     socket.on('mode_change', function(data) {
       console.log('mode_change: ' + data);
     });
