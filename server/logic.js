@@ -1,8 +1,8 @@
 // vim: set ts=2 et:
 
 module.exports = function() {
-  var iface = {}, // intarface too all this logic
-      def_room = "room1",
+  var iface = {}, // interface too all this logic
+      def_room = "classroom1",
       admins = {},
       peers = {},
       rooms = {},
@@ -30,7 +30,7 @@ module.exports = function() {
         c_room, i;
 
     i = 1;
-    c_room = "room" + i;
+    c_room = "split_room" + i;
     rooms[c_room] = [];
     _a_peers.forEach(function(p, idx, _a) {
       if (_n_peers-idx > 1 && rooms[c_room].length === ppr) {
@@ -53,6 +53,7 @@ module.exports = function() {
   function updateClientsLists(_type) {
     Object.keys(rooms).forEach(function(name, ri, _a) {
       rooms[name].forEach(function(_id, idx, users) {
+        console.log("Emitted update_list event with type", _type, "to client", _id)
         peers[_id].emit('update_list', users, _type);
       });
     });

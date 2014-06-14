@@ -8,6 +8,7 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
   var my_id, iface = {},
       socket = io.connect('http://localhost:8111'),
       mode = NOT_WORKING,
+      students = Array(),
       v_chat; // All the video chat logic
 
   function set_click_mode_change() {
@@ -32,13 +33,20 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
 
   function set_click_start_broadcasting() {
     $("#broadcast").click(function() {
-
+      in_groups = false;  // to bypass something ugly
+      broadcast_mode = true;  // to enable broadcast mode
+      v_chat.start(broadcast_mode, in_groups, function() {
+        console.log("I'm calling: ", students)
+        v_chat.make_1way_calls(students)
+      });
     })
   }
 
   function for_admin() {
-    console.log("Admin mode.");
+    console.log("You're now an instructor.");
     socket.on('list_rooms', function(listRooms) {
+      students = Array();
+
       // console.log(listRooms);
       var r = $('#list_users');
       r.empty();
@@ -46,12 +54,14 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
         r.append("<ul>" + name);
         listRooms[name].forEach(function(user, _i, _a) {
           r.append("<li>" + user + "</li>");
+          students.push(user)
         });
         r.append("</ul>");
       });
     });
 
     set_click_mode_change();
+    set_click_start_broadcasting();
     socket.emit('mode_change', "All");
     mode = BROADCAST_MODE;
     show_mode("#current_mode");
@@ -59,6 +69,8 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
 
   function for_peer() {
     socket.on('update_list', function(listUsers, change_type) {
+      // XXX: changing mode events aren't propagated!!!
+
       console.log('update_list event: ' + listUsers + " | change_type: " + change_type);
       var u = $('#list_users');
       u.empty();
@@ -68,23 +80,30 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
       });
 
       if (change_type === 'few') {
+        v_chat.end_calls();
         console.log("We are in a room, video time!")
         console.log("Calling to: " + listUsers)
-        v_chat.start(function() { v_chat.make_calls(listUsers); });
+        in_groups = true;
+        broadcast_mode = false;
+        v_chat.start(broadcast_mode, in_groups, function() {
+          v_chat.make_calls(listUsers);
+        });
       }
 
       if (change_type === 'all') {
-        console.log("Out of video chat mode!");
         v_chat.end_calls();
+        v_chat.start(false, false, function() {})
+        console.log("Out of video chat mode! Now teacher can broadcast");
       }
     });
   }
 
   function for_both() {
     socket.on('connect', function() {
-      v_chat = APP.videoChat(el_my_video, el_their_video, function() {
-        my_id = v_chat.peer_id();
-        $("#you_are").html(my_id);
+      v_chat = APP.videoChat(el_my_video, el_their_video, function(peer) {
+        my_id = peer.id
+        // my_id = v_chat.peer_id();
+        $("#you_are").text(my_id);
         if (isAdmin)
           socket.emit('newadmin', my_id);
         else
@@ -98,10 +117,10 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
     });
   }
 
+  for_both()
+
   if (isAdmin) for_admin();
   else for_peer();
-
-  for_both()
 
   return iface;
 };

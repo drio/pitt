@@ -23,9 +23,11 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
                            navigator.webkitGetUserMedia ||
                            navigator.mozGetUserMedia;
 
-  var _testing_mode = true,
-      iface = {}, // interface
-      existingCall = {},
+  var _testing_mode = false;  // use local PeerServer, not the free one
+                              // provided by PeerJS author, because it runs out
+                              // of slots
+  var iface = {}, // interface
+      existingCalls = {},
       localStream,
       class_remote_video_el = "their-video",
       seed_remote_video_id = "r_video_stream_",
@@ -46,29 +48,43 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
   });
 
   // setup incoming calls
-  function start(cb) {
+  function start(broadcast_mode, in_groups, cb) {
+    console.log("v_chat started")
+
     // Receiving a call
-    peer.on('call', function(call){
-      // Answer the call automatically (instead of prompting user) for demo purposes
-      call.answer(localStream);
+    peer.on('call', function(call) {
+      // Answer the call automatically (instead of prompting user).
+      // If in_groups, assume sharing the video, otherwise assume it's
+      // a broadcast from the instructor
+      console.log("on call1")
+      if (in_groups) {
+        call.answer(localStream);
+      } else {
+        call.answer();
+      }
+      console.log("on call2")
+
       incoming(call);
     });
 
-    peer.on('error', function(err){
+    peer.on('error', function(err) {
       console.log(err.message);
     });
 
-    navigator.getUserMedia({audio: true, video: true}, function(stream){
-      el_local_video.prop('src', URL.createObjectURL(stream));
-      localStream = stream;
-      cb();
-    }, function(){ console.log("Error getting UserMedia."); });
+    if (in_groups || broadcast_mode) {
+      console.log("Getting user media")
+      navigator.getUserMedia({audio: true, video: true}, function(stream) {
+        el_local_video.prop('src', URL.createObjectURL(stream));
+        localStream = stream;
+        cb();
+      }, function(){ console.log("Error getting UserMedia."); });
+    }
   }
 
   // Take care of remote streams for call
   function incoming(call) {
-    if (call.peer in existingCall) {
-      existingCall[call.peer].close();
+    if (call.peer in existingCalls) {
+      existingCalls[call.peer].close();
     }
 
     // Wait for stream on the call, then set peer video display
@@ -81,7 +97,7 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
       el_remote_videos.append(video_el);
     });
 
-    existingCall[call.peer] = call;
+    existingCalls[call.peer] = call;
     console.log("Received call for peer: " + call.peer);
   }
 
@@ -92,17 +108,26 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
 
   iface.make_calls = function(listIds) {
     listIds.forEach(function(r_pid, i, a) {
+      console.log("Making a call to:", r_pid)
       var call = peer.call(r_pid, localStream);
       incoming(call);
     });
   }
 
+  iface.make_1way_calls = function(listIds) {
+    listIds.forEach(function(r_pid, i, a) {
+      console.log("Making a call to:", r_pid)
+      var call = peer.call(r_pid, localStream);
+    });
+  }
+
   iface.end_calls = function() {
-    Object.keys(existingCall).forEach(function(k, i, a) {
-      existingCall[k].close();
+    Object.keys(existingCalls).forEach(function(k, i, a) {
+      existingCalls[k].close();
       $('#' + seed_remote_video_id + k).remove();
     });
-    localStream.stop();
+    if (localStream)
+      localStream.stop();
     el_local_video.remove();
   }
 
