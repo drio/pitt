@@ -13,6 +13,10 @@ var students = Array()
 var instructors = Array()
 var user_id = ""
 
+function show_id(element, id) {
+    $(element).text(id)
+}
+
 function redraw_list(element, list) {
     $(element).empty();
     $.each(list, function(index, value) {
@@ -26,6 +30,16 @@ connection.onopen = function(session) {
     // now instead of writing `com.peerinstruction.method` simply use
     // `api:method`
     session.prefix("api", "com.peerinstruction")
+
+    // update local lists of students and instructors
+    session.call("api:get_students_list").then(function(list) {
+        students = list
+        redraw_list("#students_list", students)
+    })
+    session.call("api:get_instructors_list").then(function(list) {
+        instructors = list
+        redraw_list("#instructors_list", instructors)
+    })
 
     if (MODE_TYPE == INSTRUCTOR) {
         user_id = "peer_" + randint(0, 100)  // instructors get lower IDs
@@ -49,6 +63,7 @@ connection.onopen = function(session) {
             session.publish("api:student_gone", [], {user_id: user_id})
         })
     }
+    show_id("#user_id", user_id)
 
     // when a new student arrives, add them to the array and redraw DOM list
     session.subscribe("api:new_student", function(args, kwargs, details) {
@@ -60,10 +75,9 @@ connection.onopen = function(session) {
     // when student leaves, remove them from the array and redraw DOM list
     session.subscribe("api:student_gone", function(args, kwargs, details) {
         console.log("Event: student_gone")
-        id = kwargs["user_id"]
 
         // remove 1 element starting at index of the leaving user
-        students.splice(students.indexOf(id), 1)
+        students.splice(students.indexOf(kwargs["user_id"]), 1)
         redraw_list("#students_list", students)
     })
 
@@ -77,10 +91,9 @@ connection.onopen = function(session) {
     // when instructor leaves, remove them from the array and redraw DOM list
     session.subscribe("api:instructor_gone", function(args, kwargs, details) {
         console.log("Event: instructor_gone")
-        id = kwargs["user_id"]
 
         // remove 1 element starting at index of the leaving user
-        instructors.splice(instructors.indexOf(id), 1)
+        instructors.splice(instructors.indexOf(kwargs["user_id"]), 1)
         redraw_list("#instructors_list", instructors)
     })
 }
