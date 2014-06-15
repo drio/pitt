@@ -67,6 +67,11 @@ connection.onopen = function(session) {
         console.log("Event: receive instructors list via RPC")
         return instructors
     })
+    // and one RPC to get the current mode of the service
+    session.register("api:get_working_mode", function(args, kwargs, details) {
+        console.log("Event: receive currently operating mode")
+        return mode
+    })
 
     // first step to split students into smaller groups is to initialize
     // split-mode - via this RPC command

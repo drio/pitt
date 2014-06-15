@@ -95,12 +95,28 @@ connection.onopen = function(session) {
             session.call("api:init_split_mode").then(function(enabled) {
                 if (enabled) {
                     console.log("Split mode has been enabled")
+                    $("#start_split_mode").attr("disabled", true)
+                    $("#end_split_mode").attr("disabled", false)
                 } else {
                     console.log("Split mode wasn't enabled :(")
                 }
             },
             // in case of other type of error
             function() {console.log("Split mode wasn't enabled :(")})
+        })
+
+        $("#end_split_mode").click(function() {
+            session.call("api:end_split_mode").then(function(disabled) {
+                if (disabled) {
+                    console.log("Split mode has been disabled")
+                    $("#start_split_mode").attr("disabled", false)
+                    $("#end_split_mode").attr("disabled", true)
+                } else {
+                    console.log("Split mode wasn't disabled :(")
+                }
+            },
+            // in case of other type of error
+            function() {console.log("Split mode wasn't disabled :(")})
         })
     }
     else if (MODE_TYPE == STUDENT) {
