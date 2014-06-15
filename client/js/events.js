@@ -1,6 +1,11 @@
 // vim: set ts=2 et:
 
 APP.newPP = function(isAdmin, el_my_video, el_their_video) {
+  // some "constants"
+  var NOT_WORKING = 0;
+  var BROADCAST_MODE = 2;
+  var GROUP_MODE = 3;
+
   var my_id, iface = {},
       socket = io.connect('http://localhost:8111'),
       mode = NOT_WORKING,
@@ -8,11 +13,6 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
       change_mode_element = "#bMode",
       students = Array(),
       v_chat; // All the video chat logic
-
-  // some "constants"
-  var NOT_WORKING = 0;
-  var BROADCAST_MODE = 2;
-  var GROUP_MODE = 3;
 
   function set_click_mode_change() {
     $(change_mode_element).click(function() {
