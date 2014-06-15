@@ -13,41 +13,48 @@ var students = Array()
 var instructors = Array()
 var user_id = ""
 
-function redraw_students_list(element) {
+function redraw_list(element, list) {
     $(element).empty();
-    $.each(students, function(index, value) {
-        $(element).append("<li>" + user_id + "</li>")
-    })
-}
-
-function redraw_instructors_list(element) {
-    $(element).empty();
-    $.each(instructors, function(index, value) {
-        $(element).append("<li>" + user_id + "</li>")
+    $.each(list, function(index, value) {
+        $(element).append("<li>" + value + "</li>")
     })
 }
 
 connection.onopen = function(session) {
     console.log("Connection opened:", session)
-    user_id = "peer_" + randint(100, 200)
 
     // now instead of writing `com.peerinstruction.method` simply use
     // `api:method`
     session.prefix("api", "com.peerinstruction")
 
-    // upon arrival, every new instructor should announce themself
-    session.publish("api:new_student", [], {user_id: user_id})
+    if (MODE_TYPE == INSTRUCTOR) {
+        user_id = "peer_" + randint(0, 100)  // instructors get lower IDs
 
-    // upon closing the page: send "leaving" event
-    window.addEventListener("beforeunload", function(event) {
-        session.publish("api:student_gone", [], {user_id: user_id})
-    })
+        // upon arrival, every new instructor should announce themself
+        session.publish("api:new_instructor", [], {user_id: user_id})
+
+        // upon closing the page: send "leaving" event
+        window.addEventListener("beforeunload", function(event) {
+            session.publish("api:instructor_gone", [], {user_id: user_id})
+        })
+    }
+    else if (MODE_TYPE == STUDENT) {
+        user_id = "peer_" + randint(100, 200)  // students get higher IDs
+
+        // upon arrival, every new instructor should announce themself
+        session.publish("api:new_student", [], {user_id: user_id})
+
+        // upon closing the page: send "leaving" event
+        window.addEventListener("beforeunload", function(event) {
+            session.publish("api:student_gone", [], {user_id: user_id})
+        })
+    }
 
     // when a new student arrives, add them to the array and redraw DOM list
     session.subscribe("api:new_student", function(args, kwargs, details) {
         console.log("Event: new_student")
         students.push(kwargs["user_id"])
-        redraw_students_list("#students_list")
+        redraw_list("#students_list", students)
     })
 
     // when student leaves, remove them from the array and redraw DOM list
@@ -57,14 +64,14 @@ connection.onopen = function(session) {
 
         // remove 1 element starting at index of the leaving user
         students.splice(students.indexOf(id), 1)
-        redraw_students_list("#students_list")
+        redraw_list("#students_list", students)
     })
 
     // when a new instructor arrives, add them to the array and redraw DOM list
     session.subscribe("api:new_instructor", function(args, kwargs, details) {
         console.log("Event: new_instructor")
         instructors.push(kwargs["user_id"])
-        redraw_students_list("#instructors_list")
+        redraw_list("#instructors_list", instructors)
     })
 
     // when instructor leaves, remove them from the array and redraw DOM list
@@ -74,7 +81,7 @@ connection.onopen = function(session) {
 
         // remove 1 element starting at index of the leaving user
         instructors.splice(instructors.indexOf(id), 1)
-        redraw_students_list("#students_list")
+        redraw_list("#instructors_list", instructors)
     })
 }
 
