@@ -29,13 +29,15 @@ module.exports = function() {
         _n_peers = _a_peers.length,
         c_room, i;
 
+    rooms[def_room] = [];
+
     i = 1;
     c_room = "split_room" + i;
     rooms[c_room] = [];
     _a_peers.forEach(function(p, idx, _a) {
-      if (_n_peers-idx > 1 && rooms[c_room].length === ppr) {
+      if (_n_peers - idx > 1 && rooms[c_room].length === ppr) {
         i++;
-        c_room = "room" + i;
+        c_room = "split_room" + i;
         rooms[c_room] = [];
       }
       rooms[c_room].push(p);

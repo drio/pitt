@@ -1,33 +1,36 @@
 // vim: set ts=2 et:
 
-var NOT_WORKING = 0;
-var BROADCAST_MODE = 2;
-var GROUP_MODE = 3;
-
 APP.newPP = function(isAdmin, el_my_video, el_their_video) {
   var my_id, iface = {},
       socket = io.connect('http://localhost:8111'),
       mode = NOT_WORKING,
+      mode_display_element = "#current_mode",
+      change_mode_element = "#bMode",
       students = Array(),
       v_chat; // All the video chat logic
 
+  // some "constants"
+  var NOT_WORKING = 0;
+  var BROADCAST_MODE = 2;
+  var GROUP_MODE = 3;
+
   function set_click_mode_change() {
-    $('#bMode').click(function() {
-      var b = $('#bMode'),
+    $(change_mode_element).click(function() {
+      var b = $(change_mode_element),
           currVal = b.val(),
           newVal = (currVal === "All") ? "Few" : "All";
 
       b.attr('value', newVal);
       socket.emit('mode_change', currVal);
       mode = (currVal === "All") ? BROADCAST_MODE : GROUP_MODE;
-      show_mode("#current_mode");
+      show_mode(mode);
     });
   }
 
-  function show_mode(element) {
+  function show_mode(mode_n) {
     console.log("changing mode!")
-    $(element).text(
-      (mode === BROADCAST_MODE) ? "Broadcasting" : "Working in groups"
+    $(mode_display_element).text(
+      (mode_n === BROADCAST_MODE) ? "Broadcasting" : "Working in groups"
     )
   }
 
@@ -69,8 +72,6 @@ APP.newPP = function(isAdmin, el_my_video, el_their_video) {
 
   function for_peer() {
     socket.on('update_list', function(listUsers, change_type) {
-      // XXX: changing mode events aren't propagated!!!
-
       console.log('update_list event: ' + listUsers + " | change_type: " + change_type);
       var u = $('#list_users');
       u.empty();

@@ -37,10 +37,12 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
       peer;
 
   // Main; connect to server
-  if (_testing_mode)
+  if (_testing_mode) {
     peer = new Peer(pid, { key: 'lwjd5qra8257b9', debug: 3});
-  else
+  }
+  else {
     peer = new Peer(pid, peerjs_cfg);
+  }
 
   peer.on('open', function() {
     console.log("Your peerjs ID: " + peer.id);
@@ -128,7 +130,7 @@ var vc = function(el_local_video, el_remote_videos, cb_on_open) {
     });
     if (localStream)
       localStream.stop();
-    el_local_video.remove();
+    //el_local_video.remove();
   }
 
   return iface;
