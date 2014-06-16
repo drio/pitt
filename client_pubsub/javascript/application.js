@@ -42,6 +42,7 @@ function mode_change(mode_n) {
     if (mode_n == GROUP_MODE) value = false
     $("#start_split_mode").attr("disabled", !value)
     $("#end_split_mode").attr("disabled", value)
+    $("#start_broadcasting").attr("disabled", !value)
 }
 
 ////// PEERJS
@@ -63,11 +64,21 @@ peer.on("call", function(call) {
         call.answer()
 
         call.on("stream", function(stream) {
-            // TODO: add it to the DOM
+            console.log("Call event: stream", call, stream)
+
+            // add incoming stream to the DOM
+            var video = $("<video>")
+            video.prop("autoplay", true).prop("class", "remote_video")
+            video.prop("id", call.peer)
+            video.prop("src", URL.createObjectURL(stream))
+            $("#remote_streams").append(video)
         })
         call.on("close", function() {
-            // TODO: 1) check if Firefox supports this
-            // TODO: 2) remove the stream from the DOM
+            console.log("Call event: close", call)
+            // TODO: 1) check if Firefox supports this -> apparently neither
+            //          Firefox nor Chromium support this event
+            // TODO: 2) remove the stream from the DOM -> not really possible
+            //          yet...
         })
     }
     else if (mode == GROUP_MODE) {
@@ -102,7 +113,8 @@ function on_student_gone(args, kwargs, details) {
     console.log("Event: student_gone")
 
     // remove 1 element starting at index of the leaving user
-    students.splice(students.indexOf(kwargs["user_id"]), 1)
+    idx = students.indexOf(kwargs["user_id"])
+    if (idx != -1) students.splice(idx, 1)
     redraw_list("#students_list", students, user_id)
 }
 
@@ -116,7 +128,8 @@ function on_instructor_gone(args, kwargs, details) {
     console.log("Event: instructor_gone")
 
     // remove 1 element starting at index of the leaving user
-    instructors.splice(instructors.indexOf(kwargs["user_id"]), 1)
+    idx = instructors.indexOf(kwargs["user_id"])
+    if (idx != -1) instructors.splice(idx, 1)
     redraw_list("#instructors_list", instructors, user_id)
 }
 
@@ -191,6 +204,29 @@ connection.onopen = function(session) {
             )
         })
 
+        $("#start_broadcasting").click(function() {
+            if (mode == BROADCAST_MODE) {
+                // create a new local MediaStream
+                navigator.getUserMedia({audio: true, video: true},
+                    function(stream) {
+                        console.log("MediaStream approved!")
+                        local_stream = stream
+                        $("#local_stream_video").prop("src",
+                                                      URL.createObjectURL(stream))
+                        // call to every student
+                        // TODO: consider calling to other instructors too?
+                        for (var i = 0; i < students.length; i++) {
+                            console.log("Calling student:", students[i])
+                            call = peer.call(students[i], local_stream)
+                        };
+                    },
+                    function(error) {
+                        console.log("Error getting user MediaStream")
+                    }
+                )
+            }
+        })
+
         session.subscribe("api:mode_changed", on_mode_changed)
     }
     else if (MODE_TYPE == STUDENT) {
@@ -206,7 +242,7 @@ connection.onopen = function(session) {
         session.subscribe("api:split_mode_disabled", on_split_mode_disabled)
     }
 
-    show_id("#user_id", user_id)
+    show_id("#user_id", user_id)  // let's inform the user what's their ID
 
     // update local lists of students and instructors
     session.call("api:get_students_list").then(function(list) {

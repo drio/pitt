@@ -14,8 +14,13 @@
     <p>Your id: <span id="user_id"></span></p>
 
     <div class="control_panel">
-        <button id="start_split_mode">Split students into smaller groups</button>
-        <button id="end_split_mode" disabled="disabled">Back to broadcast mode</button>
+        <p>
+            <button id="start_split_mode">Split students into smaller groups</button>
+            <button id="end_split_mode" disabled="disabled">Back to broadcast mode</button>
+        </p>
+        <p>
+            <button id="start_broadcasting">Start broadcasting</button>
+        </p>
     </div>
     <hr>
 
@@ -24,6 +29,12 @@
 
     <p>List of other instructors:</p>
     <ul id="instructors_list"></ul>
+
+    <hr>
+    <div id="local_stream">
+        <h5>Your local stream</h5>
+        <video id="local_stream_video" autoplay></video>
+    </div>
 
     <script type="text/javascript" src="/javascript/jquery-2.1.0.min.js"></script>
     <script type="text/javascript" src="/javascript/peer.min.js"></script>
