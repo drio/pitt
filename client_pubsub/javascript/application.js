@@ -77,13 +77,15 @@ peer.on("call", function(call) {
             console.log("Call event: stream", call, stream)
 
             // add incoming stream to the DOM
+            // TODO: check if the element doesn't exist yet (in case of client
+            //       reconnecting)!
             add_video_to_element("#remote_streams", call.peer, "remote_stream",
                                  URL.createObjectURL(stream))
         })
         call.on("close", function() {
             console.log("Call event: close", call)
-            // TODO: 1) check if Firefox supports this -> apparently neither
-            //          Firefox nor Chromium support this event
+            // TODO: check if Firefox supports this -> apparently neither
+            //       Firefox nor Chromium support this event
 
             // even though this event is not triggered
             $("#" + call.peer).remove()
@@ -102,6 +104,8 @@ peer.on("call", function(call) {
                 console.log("Call event: stream", call, stream)
 
                 // add incoming stream to the DOM
+                // TODO: check if the element doesn't exist yet (in case of client
+                //       reconnecting)!
                 add_video_to_element("#remote_streams", call.peer, "remote_stream",
                                      URL.createObjectURL(stream))
             })
