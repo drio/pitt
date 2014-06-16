@@ -1,7 +1,7 @@
 // some constants
 var BROADCAST_MODE = 2
 var GROUP_MODE = 3
-var DEBUG = 3  // indicates the verbosity of the Peer logs (3 - max, 0 - min)
+var DEBUG = 2  // indicates the verbosity of the Peer logs (3 - max, 0 - min)
 
 // some global variables that hold very important data
 var students = Array()
@@ -11,6 +11,7 @@ var user_id = ""
 var mode = 0
 var peer = new Peer({host: "localhost", port: 9000, debug: DEBUG})
 var local_stream = undefined  // mediaStream from navigator.getUserMedia
+var calls_in_room = {}  // for storing P2P calls
 
 // simple hack to support as many browsers as possible
 navigator.getUserMedia = navigator.getUserMedia ||
@@ -45,6 +46,15 @@ function mode_change(mode_n) {
     $("#start_broadcasting").attr("disabled", !value)
 }
 
+function add_video_to_element(element, video_id, video_class, video_src) {
+    var video = $("<video>")
+    video.prop("autoplay", true)
+    video.prop("id", video_id)
+    video.prop("class", video_class)
+    video.prop("src", video_src)
+    $(element).append(video)
+}
+
 ////// PEERJS
 
 peer.on("open", function(id) {
@@ -67,32 +77,39 @@ peer.on("call", function(call) {
             console.log("Call event: stream", call, stream)
 
             // add incoming stream to the DOM
-            var video = $("<video>")
-            video.prop("autoplay", true).prop("class", "remote_video")
-            video.prop("id", call.peer)
-            video.prop("src", URL.createObjectURL(stream))
-            $("#remote_streams").append(video)
+            add_video_to_element("#remote_streams", call.peer, "remote_stream",
+                                 URL.createObjectURL(stream))
         })
         call.on("close", function() {
             console.log("Call event: close", call)
             // TODO: 1) check if Firefox supports this -> apparently neither
             //          Firefox nor Chromium support this event
-            // TODO: 2) remove the stream from the DOM -> not really possible
-            //          yet...
+
+            // even though this event is not triggered
+            $("#" + call.peer).remove()
         })
     }
     else if (mode == GROUP_MODE) {
-        // TODO: additionally create a local_stream if it doesn't exist yet
-        call.answer(local_stream)
+        // only answer the call if it's possible, ie. there's no connection
+        // established with this peer
+        if (calls_in_room[call.peer] !== undefined) {
+            call.answer(local_stream)
+            calls_in_room[call.peer] = call
 
-        call.on("stream", function(stream) {
-            // this is one of many streams (or in case of groups of 2, the only
-            // stream), but it still needs to be stored somewhere
-        })
-        call.on("close", function() {
-            // TODO: 1) check if Firefox supports this
-            // TODO: 2) remove the stream from the DOM
-        })
+            call.on("stream", function(stream) {
+                // this is one of many streams (or in case of groups of 2, the
+                // only stream), but it still needs to be stored somewhere
+                console.log("Call event: stream", call, stream)
+
+                // add incoming stream to the DOM
+                add_video_to_element("#remote_streams", call.peer, "remote_stream",
+                                     URL.createObjectURL(stream))
+            })
+            call.on("close", function() {
+                calls_in_room[call.peer] = undefined
+                $("#" + call.peer).remove()
+            })
+        }
     }
 })
 
@@ -139,15 +156,61 @@ function on_split_mode_enabled(args, kwargs, details) {
     // their peers
     console.log("Split mode enabled by some instructor")
 
-    connection.session.call("api:get_room_information", [], {user_id: user_id}).then(function(room) {
-        console.log("You're in this room:", room)
-        room_peers = room
-        redraw_list("#room_peers_list", room_peers, user_id)
-    })
+    connection.session.call("api:get_room_information", [],
+                            {user_id: user_id}).then(
+        function(room) {
+            console.log("You're in this room:", room)
+            room_peers = room
+            redraw_list("#room_peers_list", room_peers, user_id)
+
+            // create a new local MediaStream
+            navigator.getUserMedia({audio: true, video: true},
+                function(stream) {
+                    console.log("MediaStream approved!")
+                    local_stream = stream
+
+                    add_video_to_element("#local_stream",
+                                         "local_stream_video",
+                                         "local_stream",
+                                         URL.createObjectURL(local_stream))
+                    // call to every other student in the room
+                    for (var i = 0; i < room_peers.length; i++) {
+                        sid = room_peers[i]
+                        // don't call oneself & students that already answered
+                        if (sid != user_id && calls_in_room[sid] === undefined) {
+                            console.log("Calling student:", room_peers[i])
+                            call = peer.call(room_peers[i], local_stream)
+                            calls_in_room[sid] = call
+                        }
+                    };
+                },
+                function(error) {
+                    console.log("Error getting user MediaStream")
+                }
+            )
+        }
+    )
 }
 function on_split_mode_disabled(args, kwargs, details) {
     console.log("Split mode disabled by some instructor")
     room_peers = Array()
+
+    // iterate over items in calls_in_room and close every one of them
+    calls_to_close = Object.keys(calls_in_room)
+    for (var i = 0; i < calls_to_close.length; i++) {
+        call = calls_to_close[i]
+
+        console.log("Closing", calls_in_room[call].peer)
+
+        $(".remote_stream#" + calls_in_room[call].peer).remove()
+        calls_in_room[call].close()
+    }
+
+    calls_to_close = undefined
+    calls_in_room = {}
+    local_stream.stop()
+    local_stream = undefined
+    $("#local_stream_video").remove()
     redraw_list("#room_peers_list", room_peers, user_id)
 }
 
@@ -206,24 +269,50 @@ connection.onopen = function(session) {
 
         $("#start_broadcasting").click(function() {
             if (mode == BROADCAST_MODE) {
+                $(".local_stream").remove()
+
                 // create a new local MediaStream
                 navigator.getUserMedia({audio: true, video: true},
                     function(stream) {
                         console.log("MediaStream approved!")
                         local_stream = stream
-                        $("#local_stream_video").prop("src",
-                                                      URL.createObjectURL(stream))
+
+                        add_video_to_element("#local_stream",
+                                             "local_stream_video",
+                                             "local_stream",
+                                             URL.createObjectURL(local_stream))
                         // call to every student
                         // TODO: consider calling to other instructors too?
+                        // TODO: consider publishing an event to prevent others
+                        //       from broadcasting
                         for (var i = 0; i < students.length; i++) {
                             console.log("Calling student:", students[i])
                             call = peer.call(students[i], local_stream)
-                        };
+                            calls_in_room[ students[i] ] = call
+                        }
+
+                        $("#start_broadcasting").attr("disabled", true)
+                        $("#stop_broadcasting").attr("disabled", false)
                     },
                     function(error) {
                         console.log("Error getting user MediaStream")
                     }
                 )
+            }
+        })
+
+        $("#stop_broadcasting").click(function() {
+            if (mode == BROADCAST_MODE) {
+                calls_to_close = Object.keys(calls_in_room)
+                for (var i = 0; i < calls_to_close.length; i++) {
+                    call = calls_to_close[i]
+                    console.log("Closing", calls_in_room[call].peer)
+                    calls_in_room[call].close()
+                }
+                local_stream.stop()
+                $(".local_stream").remove()
+                $("#start_broadcasting").attr("disabled", false)
+                $("#stop_broadcasting").attr("disabled", true)
             }
         })
 
