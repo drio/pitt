@@ -11,6 +11,7 @@ var GROUP_MODE = 3
 // some global variables that hold very important data
 var students = Array()
 var instructors = Array()
+var room_peers = Array()
 var user_id = ""
 var mode = 0
 
@@ -84,10 +85,14 @@ function on_split_mode_enabled(args, kwargs, details) {
 
     connection.session.call("api:get_room_information", [], {user_id: user_id}).then(function(room) {
         console.log("You're in this room:", room)
+        room_peers = room
+        redraw_list("#room_peers_list", room_peers, user_id)
     })
 }
 function on_split_mode_disabled(args, kwargs, details) {
     console.log("Split mode disabled by some instructor")
+    room_peers = Array()
+    redraw_list("#room_peers_list", room_peers, user_id)
 }
 
 // only for instructors!
@@ -158,7 +163,7 @@ connection.onopen = function(session) {
         })
 
         session.subscribe("api:split_mode_enabled", on_split_mode_enabled)
-        // session.subscribe("api:split_mode_disabled", on_split_mode_disabled)
+        session.subscribe("api:split_mode_disabled", on_split_mode_disabled)
     }
 
     show_id("#user_id", user_id)
