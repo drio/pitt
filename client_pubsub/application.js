@@ -1,12 +1,7 @@
-console.log("Ok, Autobahn loaded", autobahn.version)
-
-function randint(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
 // some constants
 var BROADCAST_MODE = 2
 var GROUP_MODE = 3
+var DEBUG = 3  // indicates the verbosity of the Peer logs (3 - max, 0 - min)
 
 // some global variables that hold very important data
 var students = Array()
@@ -14,6 +9,13 @@ var instructors = Array()
 var room_peers = Array()
 var user_id = ""
 var mode = 0
+var peer = new Peer({host: "localhost", port: 9000, debug: DEBUG})
+var local_stream = undefined  // mediaStream from navigator.getUserMedia
+
+// simple hack to support as many browsers as possible
+navigator.getUserMedia = navigator.getUserMedia ||
+                         navigator.webkitGetUserMedia ||
+                         navigator.mozGetUserMedia
 
 function show_id(element, id) {
     $(element).text(id)
@@ -34,13 +36,54 @@ function redraw_list(element, list, omitted_element) {
 }
 
 // if service mode changes this will be triggered
-// `mode_n` is a number, either BROADCASTING_MODE or GROUP_MODE
+// `mode_n` is a number, either BROADCAST_MODE or GROUP_MODE
 function mode_change(mode_n) {
     value = true
     if (mode_n == GROUP_MODE) value = false
     $("#start_split_mode").attr("disabled", !value)
     $("#end_split_mode").attr("disabled", value)
 }
+
+////// PEERJS
+
+peer.on("open", function(id) {
+    user_id = id
+    console.log("PeerJS: connection with PeerServer established. New id:", id)
+
+    // open WAMP connection if and only if there's established connection to
+    // the PeerJS server
+    connection.open()
+})
+peer.on("close", function() {
+    console.log("PeerJS: peer object destroyed")
+})
+peer.on("call", function(call) {
+    console.log("PeerJS: new call from ", call.peer)
+    if (mode == BROADCAST_MODE) {
+        call.answer()
+
+        call.on("stream", function(stream) {
+            // TODO: add it to the DOM
+        })
+        call.on("close", function() {
+            // TODO: 1) check if Firefox supports this
+            // TODO: 2) remove the stream from the DOM
+        })
+    }
+    else if (mode == GROUP_MODE) {
+        // TODO: additionally create a local_stream if it doesn't exist yet
+        call.answer(local_stream)
+
+        call.on("stream", function(stream) {
+            // this is one of many streams (or in case of groups of 2, the only
+            // stream), but it still needs to be stored somewhere
+        })
+        call.on("close", function() {
+            // TODO: 1) check if Firefox supports this
+            // TODO: 2) remove the stream from the DOM
+        })
+    }
+})
 
 ////// EVENTS
 
@@ -104,15 +147,14 @@ function on_mode_changed(args, kwargs, details) {
 ////// CONNECTION, SESSION
 
 connection.onopen = function(session) {
-    console.log("Connection opened:", session)
+    // this happens *always* after successful connection to the PeerServer
+    console.log("WAMP connection opened")
 
     // now instead of writing `com.peerinstruction.method` simply use
     // `api:method`
     session.prefix("api", "com.peerinstruction")
 
     if (MODE_TYPE == INSTRUCTOR) {
-        user_id = "peer_" + randint(0, 100)  // instructors get lower IDs
-
         // upon arrival, every new instructor should announce themself
         session.publish("api:new_instructor", [], {user_id: user_id})
 
@@ -152,8 +194,6 @@ connection.onopen = function(session) {
         session.subscribe("api:mode_changed", on_mode_changed)
     }
     else if (MODE_TYPE == STUDENT) {
-        user_id = "peer_" + randint(100, 200)  // students get higher IDs
-
         // upon arrival, every new instructor should announce themself
         session.publish("api:new_student", [], {user_id: user_id})
 
@@ -196,5 +236,3 @@ connection.onopen = function(session) {
     // when instructor leaves, remove them from the array and redraw DOM list
     session.subscribe("api:instructor_gone", on_instructor_gone)
 }
-
-connection.open()
