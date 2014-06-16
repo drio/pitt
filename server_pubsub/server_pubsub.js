@@ -41,7 +41,8 @@ connection.onopen = function(session) {
         console.log("Event: student_gone")
 
         // remove 1 element starting at index of the leaving user
-        students.splice(students.indexOf(kwargs["user_id"]), 1)
+        idx = students.indexOf(kwargs["user_id"])
+        if (idx != -1) students.splice(idx, 1)
     })
 
     // when a new instructor arrives, add them to the array and redraw DOM list
@@ -55,7 +56,8 @@ connection.onopen = function(session) {
         console.log("Event: instructor_gone")
 
         // remove 1 element starting at index of the leaving user
-        instructors.splice(instructors.indexOf(kwargs["user_id"]), 1)
+        idx = instructors.indexOf(kwargs["user_id"])
+        if (idx != -1) instructors.splice(idx, 1)
     })
 
     // two simple RPCs for newcomers
@@ -77,7 +79,8 @@ connection.onopen = function(session) {
     // split-mode - via this RPC command
     session.register("api:init_split_mode", function(args, kwargs, details) {
         console.log("Event: some instructor initialized split mode")
-        // TODO: check if the mode hasn't been enabled before
+        if (mode == GROUP_MODE)
+            throw new autobahn.Error("api:mode_change_error")
 
         mode = GROUP_MODE
 
@@ -96,8 +99,9 @@ connection.onopen = function(session) {
 
         // announce split mode to every peer (including instructors)
         session.publish("api:split_mode_enabled")
+        session.publish("api:mode_changed", [mode], {mode: mode})
 
-        return true
+        return mode  // mode is 2 or 3, if we get 0 then it means errors
     })
 
     // any instructor is allowed to deactivate split-mode by simply invoking
@@ -111,8 +115,9 @@ connection.onopen = function(session) {
 
         // announce end of split mode to every peer (including instructors)
         session.publish("api:split_mode_disabled")
+        session.publish("api:mode_changed", [mode], {mode: mode})
 
-        return true
+        return mode  // mode is 2 or 3, if we get 0 then it means errors
     })
 
     session.register("api:get_room_information", function(args, kwargs, details) {

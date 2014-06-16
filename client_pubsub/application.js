@@ -4,9 +4,15 @@ function randint(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+// some constants
+var BROADCAST_MODE = 2
+var GROUP_MODE = 3
+
+// some global variables that hold very important data
 var students = Array()
 var instructors = Array()
 var user_id = ""
+var mode = 0
 
 function show_id(element, id) {
     $(element).text(id)
@@ -24,6 +30,15 @@ function redraw_list(element, list, omitted_element) {
             $(element).append("<li>" + value + "</li>")
         }
     })
+}
+
+// if service mode changes this will be triggered
+// `mode_n` is a number, either BROADCASTING_MODE or GROUP_MODE
+function mode_change(mode_n) {
+    value = true
+    if (mode_n == GROUP_MODE) value = false
+    $("#start_split_mode").attr("disabled", !value)
+    $("#end_split_mode").attr("disabled", value)
 }
 
 ////// EVENTS
@@ -61,6 +76,7 @@ function on_instructor_gone(args, kwargs, details) {
     redraw_list("#instructors_list", instructors, user_id)
 }
 
+// only for students!
 function on_split_mode_enabled(args, kwargs, details) {
     // students are split into smaller groups, now every student needs to know
     // their peers
@@ -69,6 +85,15 @@ function on_split_mode_enabled(args, kwargs, details) {
     connection.session.call("api:get_room_information", [], {user_id: user_id}).then(function(room) {
         console.log("You're in this room:", room)
     })
+}
+function on_split_mode_disabled(args, kwargs, details) {
+    console.log("Split mode disabled by some instructor")
+}
+
+// only for instructors!
+function on_mode_changed(args, kwargs, details) {
+    mode = kwargs["mode"]
+    mode_change(mode)
 }
 
 ////// CONNECTION, SESSION
@@ -92,32 +117,34 @@ connection.onopen = function(session) {
         })
 
         $("#start_split_mode").click(function() {
-            session.call("api:init_split_mode").then(function(enabled) {
-                if (enabled) {
+            session.call("api:init_split_mode").then(
+                function(mode_n) {
                     console.log("Split mode has been enabled")
-                    $("#start_split_mode").attr("disabled", true)
-                    $("#end_split_mode").attr("disabled", false)
-                } else {
-                    console.log("Split mode wasn't enabled :(")
+                    mode = mode_n
+                    mode_change(mode)
+                },
+                // in case of error
+                function(error) {
+                    console.log("Split mode wasn't enabled :(", error.error)
                 }
-            },
-            // in case of other type of error
-            function() {console.log("Split mode wasn't enabled :(")})
+            )
         })
 
         $("#end_split_mode").click(function() {
-            session.call("api:end_split_mode").then(function(disabled) {
-                if (disabled) {
+            session.call("api:end_split_mode").then(
+                function(mode_n) {
                     console.log("Split mode has been disabled")
-                    $("#start_split_mode").attr("disabled", false)
-                    $("#end_split_mode").attr("disabled", true)
-                } else {
-                    console.log("Split mode wasn't disabled :(")
+                    mode = mode_n
+                    mode_change(mode)
+                },
+                // in case of error
+                function(error) {
+                    console.log("Split mode wasn't disabled :(", error.error)
                 }
-            },
-            // in case of other type of error
-            function() {console.log("Split mode wasn't disabled :(")})
+            )
         })
+
+        session.subscribe("api:mode_changed", on_mode_changed)
     }
     else if (MODE_TYPE == STUDENT) {
         user_id = "peer_" + randint(100, 200)  // students get higher IDs
@@ -131,6 +158,7 @@ connection.onopen = function(session) {
         })
 
         session.subscribe("api:split_mode_enabled", on_split_mode_enabled)
+        // session.subscribe("api:split_mode_disabled", on_split_mode_disabled)
     }
 
     show_id("#user_id", user_id)
@@ -143,6 +171,11 @@ connection.onopen = function(session) {
     session.call("api:get_instructors_list").then(function(list) {
         instructors = list
         redraw_list("#instructors_list", instructors, user_id)
+    })
+    // update mode upon start
+    session.call("api:get_working_mode").then(function(mode_n) {
+        mode = mode_n
+        mode_change(mode)
     })
 
 
