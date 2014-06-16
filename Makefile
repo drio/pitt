@@ -1,4 +1,4 @@
-# vim: ts=2:
+# vim: ts=2 noet:
 .PHONY: test serve apu
 
 client/app.js: \
@@ -19,6 +19,5 @@ apu:
 serve: client/app.js
 	NODE_PATH=$$NODE_PATH:$(shell pwd)/server; node server/load.js
 
-test: app.js
+test: client/app.js
 	node test/multi_rooms.js >/dev/null
-	node test/question.js >/dev/null
