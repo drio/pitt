@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instructor dashboard</title>
+    <script type="text/javascript">
+    var STUDENT = 0;
+    var INSTRUCTOR = 1;
+    var MODE_TYPE = INSTRUCTOR;
+    </script>
+</head>
+<body>
+    <h1>Instructor dashboard</h1>
+    <p>Quick link to <a href="/student.html">Student dashboard</a>.</p>
+    <p>Your id: <span id="user_id"></span></p>
+
+    <div class="control_panel">
+        <p>
+            <button id="start_split_mode">Split students into smaller groups</button>
+            <button id="end_split_mode" disabled="disabled">Back to broadcast mode</button>
+        </p>
+        <p>
+            <button id="start_broadcasting">Start broadcasting</button>
+            <button id="stop_broadcasting" disabled="disabled">Stop broadcasting</button>
+        </p>
+    </div>
+    <hr>
+
+    <p>List of students:</p>
+    <ul id="students_list"></ul>
+
+    <p>List of other instructors:</p>
+    <ul id="instructors_list"></ul>
+
+    <hr>
+    <div>
+        <h5>Your local stream</h5>
+        <div id="local_stream"></div>
+    </div>
+
+    <script type="text/javascript" src="/javascript/jquery-2.1.0.min.js"></script>
+    <script type="text/javascript" src="/javascript/peer.min.js"></script>
+    <script type="text/javascript" src="/javascript/autobahn.min.js"></script>
+    <script type="text/javascript" src="/javascript/application.js"></script>
+</body>
+</html>

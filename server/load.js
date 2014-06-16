@@ -15,3 +15,5 @@ l.setSocketEvents(io);
 
 app.use('/', express.static(__dirname + '/../client'));
 http.listen(8111);
+
+console.log("Server listening on http://localhost:8111/")
