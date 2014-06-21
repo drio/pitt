@@ -46,12 +46,13 @@ function mode_change(mode_n) {
     $("#start_broadcasting").attr("disabled", !value)
 }
 
-function add_video_to_element(element, video_id, video_class, video_src) {
+function add_video_to_element(element, video_id, video_class, video_src, video_muted) {
     var video = $("<video>")
     video.prop("autoplay", true)
     video.prop("id", video_id)
     video.prop("class", video_class)
     video.prop("src", video_src)
+    video.prop("muted", video_muted)
     $(element).append(video)
 }
 
@@ -80,7 +81,7 @@ peer.on("call", function(call) {
             // TODO: check if the element doesn't exist yet (in case of client
             //       reconnecting)!
             add_video_to_element("#remote_streams", call.peer, "remote_stream",
-                                 URL.createObjectURL(stream))
+                                 URL.createObjectURL(stream), false)
         })
         call.on("close", function() {
             console.log("Call event: close", call)
@@ -107,7 +108,7 @@ peer.on("call", function(call) {
                 // TODO: check if the element doesn't exist yet (in case of client
                 //       reconnecting)!
                 add_video_to_element("#remote_streams", call.peer, "remote_stream",
-                                     URL.createObjectURL(stream))
+                                     URL.createObjectURL(stream), false)
             })
             call.on("close", function() {
                 calls_in_room[call.peer] = undefined
@@ -174,9 +175,9 @@ function on_split_mode_enabled(args, kwargs, details) {
                     local_stream = stream
 
                     add_video_to_element("#local_stream",
-                                         "local_stream_video",
-                                         "local_stream",
-                                         URL.createObjectURL(local_stream))
+                                         "local_stream_video", "local_stream",
+                                         URL.createObjectURL(local_stream),
+                                         true)
                     // call to every other student in the room
                     for (var i = 0; i < room_peers.length; i++) {
                         sid = room_peers[i]
@@ -284,7 +285,8 @@ connection.onopen = function(session) {
                         add_video_to_element("#local_stream",
                                              "local_stream_video",
                                              "local_stream",
-                                             URL.createObjectURL(local_stream))
+                                             URL.createObjectURL(local_stream),
+                                             true)
                         // call to every student
                         // TODO: consider calling to other instructors too?
                         // TODO: consider publishing an event to prevent others
